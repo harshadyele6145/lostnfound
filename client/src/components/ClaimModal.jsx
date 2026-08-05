@@ -1,0 +1,50 @@
+function ClaimModal({ open, match, message, onChange, onSubmit, onClose, error, success, submitting, demoMode }) {
+  if (!open || !match) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4">
+      <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-blue-600">CLAIM ITEM</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{match.title}</h2>
+            <p className="mt-1 text-sm text-slate-500">{match.location} · {match.category}</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-300">Close</button>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {demoMode && <div className="rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">Demo mode is active. This form will not submit a real claim while the backend is offline.</div>}
+
+          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            Explain why this item is yours. Include a detail only the owner would know, such as a unique mark or exact place it was left.
+          </div>
+
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+            Your message
+            <textarea
+              value={message}
+              onChange={(event) => onChange(event.target.value)}
+              rows={5}
+              className="mt-2 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-600 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+            />
+          </label>
+
+          {error && <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>}
+          {success && <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p>}
+
+          <div className="flex flex-wrap gap-3">
+            <button onClick={onSubmit} disabled={submitting} className="rounded-3xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+              {submitting ? "Submitting…" : demoMode ? "Save demo note" : "Submit claim"}
+            </button>
+            <button type="button" onClick={onClose} className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ClaimModal;

@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     Item[]
+  claims    Claim[]
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  categoryId  String?
+  categoryRel Category? @relation(fields: [categoryId], references: [id], name: "ItemCategory")
+  location    String
+  date        String
+  description String
+  type        ItemType
+  status      ItemStatus @default(OPEN)
+  imageUrl       String   @default("")
+  imagePublicId  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  claims      Claim[]
+
+  @@index([type, createdAt])
+  @@index([ownerId])
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  items Item[] @relation("ItemCategory")
+}
+
+model Claim {
+  id          String      @id @default(cuid())
+  message     String
+  status      ClaimStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  itemId      String
+  claimantId  String
+  item        Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  claimant    User        @relation(fields: [claimantId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, claimantId])
+  @@index([itemId])
+}
+
+enum ItemType {
+  lost
+  found
+}
+
+enum ItemStatus {
+  OPEN
+  RESOLVED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
