@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import ItemCard from "../components/ItemCard";
 import ItemModal from "../components/ItemModal";
 import ClaimModal from "../components/ClaimModal";
-import LoadingSpinner from "../components/LoadingSpinner";
 import SkeletonCard from "../components/SkeletonCard";
 import { useToast } from "../components/ToastProvider";
 import api from "../api";

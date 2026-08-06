@@ -16,7 +16,6 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import AITools from "./pages/AITools";
 import VerifyQR from "./pages/VerifyQR";
-import ErrorPage from "./pages/ErrorPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { AuthProvider } from "./AuthContext";
 import { ToastProvider } from "./components/ToastProvider";

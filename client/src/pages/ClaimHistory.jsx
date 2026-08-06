@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { useToast } from "../components/ToastProvider";
 
 function ClaimHistory() {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { addToast } = useToast();
 
   useEffect(() => {
     async function loadHistory() {

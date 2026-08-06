@@ -4,7 +4,6 @@
 import('dotenv/config');
 (async function run() {
   try {
-    const fetch = (await import('node-fetch')).default;
     const base = 'http://localhost:5000/api';
 
     console.log('Fetching items...');

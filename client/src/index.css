@@ -1,2 +1,10 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { min-width: 320px; background: #f8fafc; }
+::selection { background: #bfdbfe; color: #172554; }

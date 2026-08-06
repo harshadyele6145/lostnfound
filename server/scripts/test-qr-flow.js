@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 const API = 'http://localhost:5000/api';
 
 async function postJson(url, body, token) {
