@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import { createWorker } from "tesseract.js";
 import OpenAI from "openai";
 import prisma from "../lib/prisma.js";
+import auth from "../middleware/auth.js";
 
 const router = Router();
 const upload = multer({
@@ -82,7 +83,7 @@ const itemSelect = {
   owner: { select: { name: true } },
 };
 
-router.post("/ocr", upload.single("image"), async (req, res, next) => {
+router.post("/ocr", auth, upload.single("image"), async (req, res, next) => {
   if (!req.file) return res.status(400).json({ message: "Upload an image for OCR." });
 
   try {
@@ -123,7 +124,7 @@ router.post("/chat", async (req, res, next) => {
   }
 });
 
-router.post("/similarity", upload.single("image"), async (req, res, next) => {
+router.post("/similarity", auth, upload.single("image"), async (req, res, next) => {
   if (!req.file) return res.status(400).json({ message: "Upload an image to find similar reports." });
 
   try {

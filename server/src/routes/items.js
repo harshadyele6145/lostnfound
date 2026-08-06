@@ -219,6 +219,7 @@ router.post("/:id/claims", auth, async (req, res, next) => {
     if (!message?.trim()) return res.status(400).json({ message: "Please explain why this item may be yours." });
     const item = await prisma.item.findUnique({ where: { id: req.params.id } });
     if (!item) return res.status(404).json({ message: "Item report not found." });
+    if (item.status !== "OPEN") return res.status(400).json({ message: "This report has already been resolved." });
     if (item.ownerId === req.user.id) return res.status(400).json({ message: "You cannot claim your own report." });
     const claim = await prisma.claim.create({ data: { itemId: item.id, claimantId: req.user.id, message } });
     // Notify report owner about the new claim
@@ -373,4 +374,3 @@ router.patch("/claims/:claimId", auth, async (req, res, next) => {
 });
 
 export default router;
-

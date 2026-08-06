@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import prisma from "./lib/prisma.js";
 import cloudinary from "./lib/cloudinary.js";
 import logger from "./middleware/logger.js";
+import auth from "./middleware/auth.js";
 import authRoutes from "./routes/auth.js";
 import itemRoutes from "./routes/items.js";
 import aiRoutes from "./routes/ai.js";
@@ -51,7 +52,7 @@ app.use("/api/items", itemRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-app.post("/api/uploads", upload.single("image"), async (req, res, next) => {
+app.post("/api/uploads", auth, upload.single("image"), async (req, res, next) => {
   if (!req.file) return res.status(400).json({ message: "Please upload an image file up to 5 MB." });
 
   if (useCloudinary) {
