@@ -53,7 +53,6 @@ router.post(
         data: {
           title,
           category,
-          categoryRel: { connectOrCreate: { where: { name: category }, create: { name: category } } },
           location,
           date,
           description,
@@ -256,7 +255,6 @@ router.patch("/:id", auth, async (req, res, next) => {
     if (title) data.title = title;
     if (category) {
       data.category = category;
-      data.categoryRel = { connectOrCreate: { where: { name: category }, create: { name: category } } };
     }
     if (location) data.location = location;
     if (date) data.date = date;
