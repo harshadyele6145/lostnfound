@@ -35,7 +35,7 @@ const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, standardHeaders: t
 app.use("/api/auth", authLimiter);
 
 app.use(logger);
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(cors({ origin: true }));
 app.use(express.json({ limit: "1mb" }));
 const upload = multer({
   storage: multer.diskStorage({
@@ -61,7 +61,7 @@ app.post("/api/uploads", auth, upload.single("image"), async (req, res, next) =>
       await fs.unlink(req.file.path).catch(() => {});
       return res.status(201).json({ imageUrl: result.secure_url, imagePublicId: result.public_id });
     } catch (error) {
-      return next(error);
+      console.warn("Cloudinary upload failed; keeping the local upload.", error.message);
     }
   }
 
@@ -70,6 +70,9 @@ app.post("/api/uploads", auth, upload.single("image"), async (req, res, next) =>
 
 app.use((err, _req, res, _next) => {
   console.error(err);
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: "Please upload an image smaller than 5 MB." });
+  }
   res.status(500).json({ message: "Something went wrong. Please try again." });
 });
 

@@ -38,13 +38,13 @@ const intersectionSize = (a, b) => {
 };
 
 const extractTextFromImage = async (filePath) => {
-  const worker = createWorker({ logger: () => {} });
-  await worker.load();
-  await worker.loadLanguage("eng");
-  await worker.initialize("eng");
-  const { data: { text } } = await worker.recognize(filePath);
-  await worker.terminate();
-  return text.replace(/\s+/g, " ").trim();
+  const worker = await createWorker("eng", 1, { logger: () => {} });
+  try {
+    const { data: { text } } = await worker.recognize(filePath);
+    return text.replace(/\s+/g, " ").trim();
+  } finally {
+    await worker.terminate();
+  }
 };
 
 const fallbackAssistantReply = (message) => {

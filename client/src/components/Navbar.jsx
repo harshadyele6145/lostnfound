@@ -14,8 +14,8 @@ function Navbar() {
   }, [dark]);
 
   const publicLinks = [["/", "Home"]];
-  const privateLinks = [["/report-lost", "Report lost"], ["/report-found", "Report found"], ["/dashboard", "Dashboard"], ["/analytics", "Analytics"], ["/profile", "Profile"], ["/my-reports", "My reports"], ["/my-claims", "My claims"], ["/claims-history", "Claim history"]];
-  const links = isAuthenticated ? [...publicLinks, ...privateLinks, ["/ai-tools", "AI tools"]] : publicLinks;
+  const privateLinks = [["/dashboard", "Dashboard"], ["/report-lost", "Report lost"], ["/report-found", "Report found"], ["/my-reports", "My reports"], ["/my-claims", "My claims"], ["/ai-tools", "AI tools"]];
+  const links = isAuthenticated ? [...publicLinks, ...privateLinks] : publicLinks;
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
