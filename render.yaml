@@ -3,7 +3,7 @@ services:
     name: campusfind-api
     runtime: node
     rootDir: server
-    buildCommand: npm ci
+    buildCommand: npm ci && npm run db:deploy
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
