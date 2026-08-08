@@ -1,18 +1,44 @@
-import { getImageSrc } from "../api";
+import React from "react";
 
-function ItemCard({ item, onMatch, onDetails }) {
+function ItemCard({ item, onClaim }) {
+  const isFound = item.type?.toLowerCase() === "found";
+
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        {item.imageUrl ? <img src={getImageSrc(item.imageUrl)} alt={item.title} className="h-14 w-14 rounded-xl object-cover" /> : <span className="text-3xl" aria-hidden="true">{item.icon}</span>}
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${item.type === "Lost" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700"}`}>{item.type}</span>
+    <div className="flex flex-col justify-between rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:shadow-lg dark:bg-slate-900 dark:ring-slate-800">
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-3xl">{item.icon || "📦"}</span>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              isFound
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                : "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+            }`}
+          >
+            {item.type}
+          </span>
+        </div>
+
+        <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
+          {item.title}
+        </h3>
+        <p className="mt-1 text-xs text-slate-500">
+          📍 {item.location} · 🕒 {item.when}
+        </p>
+        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+          {item.description}
+        </p>
       </div>
-      <button onClick={() => onDetails?.(item)} className="text-left font-bold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400">{item.title}</button>
-      <p className="mt-1 text-sm text-slate-500">{item.location} · {item.when}</p>
-      <p className="mt-4 text-sm text-slate-600">{item.description}</p>
-      {onMatch && <button onClick={() => onMatch(item)} className="mt-4 text-sm font-semibold text-blue-700 hover:text-blue-900">Find possible matches →</button>}
-      {onDetails && <button onClick={() => onDetails(item)} className="ml-4 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white">Details</button>}
-    </article>
+
+      {isFound && onClaim && (
+        <button
+          onClick={onClaim}
+          className="mt-6 w-full rounded-2xl bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+        >
+          Claim This Item
+        </button>
+      )}
+    </div>
   );
 }
 

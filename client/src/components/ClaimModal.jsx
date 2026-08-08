@@ -1,5 +1,66 @@
-function ClaimModal({ open, match, message, onChange, onSubmit, onClose, error, success, submitting, demoMode }) {
-  if (!open || !match) return null;
+import React, { useState } from "react";
+import { useAuth } from "../AuthContext";
+
+function ClaimModal({ open, item, onClose, onSuccess }) {
+  const { token } = useAuth();
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  if (!open || !item) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!token) {
+      setError("You must be logged in to submit a claim.");
+      return;
+    }
+
+    if (!message.trim()) {
+      setError("Please provide a message explaining why this item is yours.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+      const response = await fetch(`${API_URL}/items/${item.id}/claim`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ proofDetails: message }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit claim.");
+      }
+
+      setSuccess("Claim submitted successfully!");
+      setMessage("");
+
+      if (onSuccess) {
+        onSuccess(data);
+      }
+
+      setTimeout(() => {
+        setSuccess("");
+        onClose();
+      }, 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4">
@@ -7,41 +68,70 @@ function ClaimModal({ open, match, message, onChange, onSubmit, onClose, error, 
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-blue-600">CLAIM ITEM</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{match.title}</h2>
-            <p className="mt-1 text-sm text-slate-500">{match.location} · {match.category}</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
+              {item.title}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {item.location} · {item.category}
+            </p>
           </div>
-          <button onClick={onClose} className="rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-300">Close</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            Close
+          </button>
         </div>
 
-        <div className="mt-6 space-y-4">
-          {demoMode && <div className="rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">Demo mode is active. This form will not submit a real claim while the backend is offline.</div>}
-
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            Explain why this item is yours. Include a detail only the owner would know, such as a unique mark or exact place it was left.
+            Explain why this item is yours. Include a detail only the owner
+            would know, such as a unique mark or exact place it was left.
           </div>
 
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
             Your message
             <textarea
               value={message}
-              onChange={(event) => onChange(event.target.value)}
+              onChange={(e) => setMessage(e.target.value)}
               rows={5}
+              disabled={submitting}
               className="mt-2 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-600 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              placeholder="Describe unique marks, contents, or exact location where you lost it..."
             />
           </label>
 
-          {error && <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>}
-          {success && <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p>}
+          {error && (
+            <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {error}
+            </p>
+          )}
+
+          {success && (
+            <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {success}
+            </p>
+          )}
 
           <div className="flex flex-wrap gap-3">
-            <button onClick={onSubmit} disabled={submitting} className="rounded-3xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
-              {submitting ? "Submitting…" : demoMode ? "Save demo note" : "Submit claim"}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-3xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+            >
+              {submitting ? "Submitting…" : "Submit claim"}
             </button>
-            <button type="button" onClick={onClose} className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
               Cancel
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
