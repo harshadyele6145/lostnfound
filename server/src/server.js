@@ -16,7 +16,11 @@ import analyticsRoutes from "./routes/analytics.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
-const useCloudinary = Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+const useCloudinary = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
 
 // Security: set security headers
 app.use(helmet());
@@ -31,55 +35,87 @@ const apiLimiter = rateLimit({
 app.use("/api/", apiLimiter);
 
 // Stricter limiter for authentication endpoints to mitigate brute-force
-const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 app.use("/api/auth", authLimiter);
 
 app.use(logger);
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: "1mb" }));
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: "uploads",
-    filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`),
+    filename: (_req, file, cb) =>
+      cb(null, `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`),
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 });
+
 app.use("/uploads", express.static("uploads"));
+
+// Health check
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+
+// Route handlers
 app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
+// Image Upload Endpoint
 app.post("/api/uploads", auth, upload.single("image"), async (req, res, next) => {
-  if (!req.file) return res.status(400).json({ message: "Please upload an image file up to 5 MB." });
+  if (!req.file)
+    return res.status(400).json({ message: "Please upload an image file up to 5 MB." });
 
   if (useCloudinary) {
     try {
-      const result = await cloudinary.uploader.upload(req.file.path, { folder: "campusfind" });
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "campusfind",
+      });
       await fs.unlink(req.file.path).catch(() => {});
-      return res.status(201).json({ imageUrl: result.secure_url, imagePublicId: result.public_id });
+      return res
+        .status(201)
+        .json({ imageUrl: result.secure_url, imagePublicId: result.public_id });
     } catch (error) {
-      console.warn("Cloudinary upload failed; keeping the local upload.", error.message);
+      console.warn(
+        "Cloudinary upload failed; keeping the local upload.",
+        error.message
+      );
     }
   }
 
   res.status(201).json({ imageUrl: `/uploads/${req.file.filename}` });
 });
 
+// Global Error Handler
 app.use((err, _req, res, _next) => {
   console.error(err);
   if (err instanceof multer.MulterError) {
-    return res.status(400).json({ message: "Please upload an image smaller than 5 MB." });
+    return res
+      .status(400)
+      .json({ message: "Please upload an image smaller than 5 MB." });
   }
   res.status(500).json({ message: "Something went wrong. Please try again." });
 });
 
-prisma.$connect().then(() => {
-  console.log("Connected to PostgreSQL");
-}).catch((error) => {
-  console.warn("PostgreSQL is unavailable; starting in demo mode. Database-backed features will be unavailable.", error.message);
-}).finally(() => {
-  app.listen(port, () => console.log(`API running on http://localhost:${port}`));
-});
+// Database Connection & Server Initialization
+prisma
+  .$connect()
+  .then(() => {
+    console.log("Connected to PostgreSQL");
+  })
+  .catch((error) => {
+    console.warn(
+      "PostgreSQL is unavailable; starting in demo mode. Database-backed features will be unavailable.",
+      error.message
+    );
+  })
+  .finally(() => {
+    app.listen(port, () => console.log(`API running on http://localhost:${port}`));
+  });
