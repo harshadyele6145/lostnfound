@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../AuthContext";
+import { submitClaim } from "../api";
 
 function ClaimModal({ open, item, onClose, onSuccess }) {
   const { token } = useAuth();
@@ -27,45 +28,13 @@ function ClaimModal({ open, item, onClose, onSuccess }) {
 
     try {
       setSubmitting(true);
-      
-      // Get base API URL
-      let API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-      
-      // Ensure API_URL ends cleanly without double slashes
-      API_URL = API_URL.replace(/\/$/, "");
-
-      const response = await fetch(`${API_URL}/items/${item.id}/claim`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ proofDetails: message }),
-      });
-
-      // Handle non-JSON responses (e.g. 404/500 HTML pages) safely
-      const contentType = response.headers.get("content-type");
-      let data = {};
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        console.error("Non-JSON Server Response:", text);
-        throw new Error(
-          `Server returned an invalid response (${response.status}). Please verify your backend API deployment.`
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to submit claim.");
-      }
+      await submitClaim(item.id, message, token);
 
       setSuccess("Claim submitted successfully!");
       setMessage("");
 
       if (onSuccess) {
-        onSuccess(data);
+        onSuccess();
       }
 
       setTimeout(() => {
