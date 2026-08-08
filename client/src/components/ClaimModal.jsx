@@ -72,7 +72,7 @@ function ClaimModal({ open, item, onClose, onSuccess }) {
               {item.title}
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              {item.location} · {item.category}
+              {item.location} · {item.category || "General"}
             </p>
           </div>
           <button

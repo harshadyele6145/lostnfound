@@ -3,6 +3,20 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const prisma = require('../lib/prisma');
 
+// Get all items
+router.get('/', async (req, res) => {
+  try {
+    const items = await prisma.item.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
+    res.json(items);
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Submit a claim for a specific item
 router.post('/:id/claim', auth, async (req, res) => {
   try {

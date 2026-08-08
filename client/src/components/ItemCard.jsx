@@ -23,7 +23,7 @@ function ItemCard({ item, onClaim }) {
           {item.title}
         </h3>
         <p className="mt-1 text-xs text-slate-500">
-          📍 {item.location} · 🕒 {item.when}
+          📍 {item.location} · 🕒 {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : item.when || "Recently"}
         </p>
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
           {item.description}
